@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +39,18 @@ class MainActivity : AppCompatActivity() {
     private var buttonsPressed = ArrayList<Button>()
     private var activePlayer = 1
 
+    private fun resetGame() {
+        Thread.sleep(2000)
+        player1.clear()
+        player2.clear()
+        activePlayer = 1
+        for (button in buttonsPressed) {
+            button.text = ""
+            button.setBackgroundColor(Color.GRAY)
+            button.isEnabled = true
+        }
+        buttonsPressed.clear()
+    }
     private fun playGame(cellId: Int, buttonSelected: Button) {
         // update players
         if (activePlayer == 1) {
@@ -44,6 +58,10 @@ class MainActivity : AppCompatActivity() {
             buttonSelected.setBackgroundColor(Color.MAGENTA)
             player1.add(cellId)
             activePlayer = 2
+            val continueGame = autoPlay()
+            if (!continueGame) {
+                resetGame()
+            }
         } else {
             buttonSelected.text = "O"
             buttonSelected.setBackgroundColor(Color.CYAN)
@@ -56,19 +74,36 @@ class MainActivity : AppCompatActivity() {
         buttonsPressed.add(buttonSelected)
         // check winner
         if (checkWinner()) {
-            Thread.sleep(2000)
-            player1.clear()
-            player2.clear()
-            activePlayer = 1
-            for (button in buttonsPressed) {
-                button.text = ""
-                button.setBackgroundColor(Color.GRAY)
-                button.isEnabled = true
-            }
-            buttonsPressed.clear()
+            resetGame()
         }
     }
-
+    private fun autoPlay() : Boolean {
+        var emptyCells = ArrayList<Int>()
+        for (cellId in 1..9) {
+            if (!(player1.contains(cellId) || player2.contains(cellId)))
+                emptyCells.add(cellId)
+        }
+        if (emptyCells.isEmpty())
+            return false
+        // random cell
+        val r = Random()
+        val randomIndex = r.nextInt(emptyCells.size-0)+0
+        val cellId = emptyCells[randomIndex]
+        var buSelected:Button = button1
+        when (cellId) {
+            1-> buSelected=button1
+            2-> buSelected=button2
+            3-> buSelected=button3
+            4-> buSelected=button4
+            5-> buSelected=button5
+            6-> buSelected=button6
+            7-> buSelected=button7
+            8-> buSelected=button8
+            9-> buSelected=button9
+        }
+        playGame(cellId, buSelected)
+        return true
+    }
     private fun checkWinner(): Boolean {
         var winner = -1
         // rows

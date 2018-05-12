@@ -15,10 +15,10 @@
 
         <Button
             android:id="@+id/button1"
-            android:background="@color/colorGray"
             android:layout_width="40pt"
             android:layout_height="40pt"
             android:layout_marginRight="3pt"
+            android:background="@color/colorGray"
             android:onClick="buttonClick"
             android:textSize="30sp" />
 
@@ -84,31 +84,31 @@
         android:gravity="center">
 
         <Button
-            android:background="@color/colorGray"
             android:id="@+id/button7"
             android:layout_width="40pt"
             android:layout_height="40pt"
             android:layout_marginRight="3pt"
-            android:textSize="30sp"
-            android:onClick="buttonClick" />
+            android:background="@color/colorGray"
+            android:onClick="buttonClick"
+            android:textSize="30sp" />
 
         <Button
             android:id="@+id/button8"
-            android:background="@color/colorGray"
             android:layout_width="40pt"
             android:layout_height="40pt"
             android:layout_marginRight="3pt"
-            android:textSize="30sp"
-            android:onClick="buttonClick" />
+            android:background="@color/colorGray"
+            android:onClick="buttonClick"
+            android:textSize="30sp" />
 
         <Button
             android:id="@+id/button9"
-            android:background="@color/colorGray"
             android:layout_width="40pt"
             android:layout_height="40pt"
             android:layout_marginRight="3pt"
-            android:textSize="30sp"
-            android:onClick="buttonClick" />
+            android:background="@color/colorGray"
+            android:onClick="buttonClick"
+            android:textSize="30sp" />
 
     </TableRow>
 

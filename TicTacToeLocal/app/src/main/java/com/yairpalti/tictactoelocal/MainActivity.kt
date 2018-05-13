@@ -9,14 +9,46 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
+
+class Player(val ID:Int=0, val symbol:String, val color:Int) { //TODO - add properties - player type:Android/human
+    private var playedCells = ArrayList<Int>()
+    fun play(cellId: Int) {
+        playedCells.add(cellId)
+    }
+    fun containsCell(cellId: Int):Boolean {
+        return playedCells.contains(cellId)
+    }
+    fun restartGame() {
+        playedCells.clear()
+    }
+
+    fun isWin(): Boolean { //TODO - check logic in loops
+        if ((playedCells.contains(1) && playedCells.contains(2) && playedCells.contains(3)) ||
+                (playedCells.contains(4) && playedCells.contains(5) && playedCells.contains(6)) ||
+                (playedCells.contains(7) && playedCells.contains(8) && playedCells.contains(9)) ||
+                // columns
+                (playedCells.contains(1) && playedCells.contains(4) && playedCells.contains(7)) ||
+                (playedCells.contains(2) && playedCells.contains(5) && playedCells.contains(8)) ||
+                (playedCells.contains(3) && playedCells.contains(6) && playedCells.contains(9)) ||
+                // diagonal
+                (playedCells.contains(1) && playedCells.contains(5) && playedCells.contains(9)) ||
+                (playedCells.contains(3) && playedCells.contains(5) && playedCells.contains(7)))
+            return true
+        return false
+    }
+}
 class MainActivity : AppCompatActivity() {
+
+    private val player1 = Player(1,"X", Color.MAGENTA)
+    private val player2 = Player(2, "O", Color.CYAN)
+    private var buttonsPressed = ArrayList<Button>()
+    private var activePlayer = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
     }
-
-    protected fun buttonClick(view: View) {
+    protected fun buttonClick(view: View) { // TODO - refactor to extract cellID from String
         val buttonSelected = view as Button
         var cellID = 0
         when (buttonSelected.id) {
@@ -33,16 +65,10 @@ class MainActivity : AppCompatActivity() {
  //       Toast.makeText(this, "ID:" + cellID, Toast.LENGTH_SHORT).show()
         playGame(cellID, buttonSelected)
     }
-
-    private var player1 = ArrayList<Int>()
-    private var player2 = ArrayList<Int>()
-    private var buttonsPressed = ArrayList<Button>()
-    private var activePlayer = 1
-
     private fun resetGame() {
         Thread.sleep(2000)
-        player1.clear()
-        player2.clear()
+        player1.restartGame()
+        player2.restartGame()
         activePlayer = 1
         for (button in buttonsPressed) {
             button.text = ""
@@ -53,19 +79,19 @@ class MainActivity : AppCompatActivity() {
     }
     private fun playGame(cellId: Int, buttonSelected: Button) {
         // update players
-        if (activePlayer == 1) {
-            buttonSelected.text = "X"
-            buttonSelected.setBackgroundColor(Color.MAGENTA)
-            player1.add(cellId)
+        if (activePlayer == 1) { // TODO - get rid of the if/else by moving those to be properties in Player
+            buttonSelected.text = player1.symbol
+            buttonSelected.setBackgroundColor(player1.color)
+            player1.play(cellId)
             activePlayer = 2
             val continueGame = autoPlay()
             if (!continueGame) {
                 resetGame()
             }
         } else {
-            buttonSelected.text = "O"
-            buttonSelected.setBackgroundColor(Color.CYAN)
-            player2.add(cellId)
+            buttonSelected.text = player2.symbol
+            buttonSelected.setBackgroundColor(player2.color)
+            player2.play(cellId)
             activePlayer = 1
         }
         // Disable button press
@@ -73,14 +99,16 @@ class MainActivity : AppCompatActivity() {
         // Add selected button to list
         buttonsPressed.add(buttonSelected)
         // check winner
-        if (checkWinner()) {
+        // TODO - move board logic to new class Board with statuses
+        // TODO - move size of the board to be N
+        if (checkWinner() || buttonsPressed.size == 9) {
             resetGame()
         }
     }
-    private fun autoPlay() : Boolean {
+    private fun autoPlay() : Boolean { // TODO - add logic to find best cell to play
         var emptyCells = ArrayList<Int>()
         for (cellId in 1..9) {
-            if (!(player1.contains(cellId) || player2.contains(cellId)))
+            if (!(player1.containsCell(cellId) || player2.containsCell(cellId)))
                 emptyCells.add(cellId)
         }
         if (emptyCells.isEmpty())
@@ -90,7 +118,7 @@ class MainActivity : AppCompatActivity() {
         val randomIndex = r.nextInt(emptyCells.size-0)+0
         val cellId = emptyCells[randomIndex]
         var buSelected:Button = button1
-        when (cellId) {
+        when (cellId) { //TODO - set buSelected by converting the Int to button name
             1-> buSelected=button1
             2-> buSelected=button2
             3-> buSelected=button3
@@ -107,27 +135,9 @@ class MainActivity : AppCompatActivity() {
     private fun checkWinner(): Boolean {
         var winner = -1
         // rows
-        if ((player1.contains(1) && player1.contains(2) && player1.contains(3)) ||
-                (player1.contains(4) && player1.contains(5) && player1.contains(6)) ||
-                (player1.contains(7) && player1.contains(8) && player1.contains(9)) ||
-                // columns
-                (player1.contains(1) && player1.contains(4) && player1.contains(7)) ||
-                (player1.contains(2) && player1.contains(5) && player1.contains(8)) ||
-                (player1.contains(3) && player1.contains(6) && player1.contains(9)) ||
-                // diagonal
-                (player1.contains(1) && player1.contains(5) && player1.contains(9)) ||
-                (player1.contains(3) && player1.contains(5) && player1.contains(7))) {
+        if (player1.isWin()) {
             winner = 1
-        } else if ((player2.contains(1) && player2.contains(2) && player2.contains(3)) ||
-                (player2.contains(4) && player2.contains(5) && player2.contains(6)) ||
-                (player2.contains(7) && player2.contains(8) && player2.contains(9)) ||
-                // columns
-                (player2.contains(1) && player2.contains(4) && player2.contains(7)) ||
-                (player2.contains(2) && player2.contains(5) && player2.contains(8)) ||
-                (player2.contains(3) && player2.contains(6) && player2.contains(9)) ||
-                // diagonal
-                (player2.contains(1) && player2.contains(5) && player2.contains(9)) ||
-                (player2.contains(3) && player2.contains(5) && player2.contains(7))) {
+        } else if (player2.isWin()) {
             winner = 2
         }
         if (winner != -1) {

@@ -8,12 +8,21 @@ import android.widget.Button
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import android.view.ViewGroup
 
 
-class Player(val ID:Int=0, val symbol:String, val color:Int) { //TODO - add properties - player type:Android/human
+
+enum class PlayerType {
+    HUMAN, ANDROID
+}
+
+class Player(val name:String, val symbol:String, val color:Int, val playerType:PlayerType=PlayerType.HUMAN) {
     private var playedCells = ArrayList<Int>()
     fun play(cellId: Int) {
         playedCells.add(cellId)
+    }
+    fun numberOfPlays():Int {
+        return playedCells.size
     }
     fun containsCell(cellId: Int):Boolean {
         return playedCells.contains(cellId)
@@ -39,29 +48,35 @@ class Player(val ID:Int=0, val symbol:String, val color:Int) { //TODO - add prop
 }
 class MainActivity : AppCompatActivity() {
 
-    private val player1 = Player(1,"X", Color.MAGENTA)
-    private val player2 = Player(2, "O", Color.CYAN)
-    private var buttonsPressed = ArrayList<Button>()
-    private var activePlayer = 1
+    private val player1 = Player("You","X", Color.MAGENTA, PlayerType.HUMAN)
+    private val player2 = Player("Android", "O", Color.CYAN, PlayerType.ANDROID)
+    private var activePlayer = player1
+    private var nextPlayer = player2
+    private var gameButtons = ArrayList<Button>()
+    private val gameSize = 9
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        // Add all buttons of an array
+        for (i in 0 until gameLayout.childCount) {
+            val child = gameLayout.getChildAt(i)
+            if (child is ViewGroup)
+                for (j in 0 until child.childCount) {
+                    val childButton = child.getChildAt(j)
+                    if (childButton is Button)
+                        gameButtons.add(childButton)
+                }
+        }
+        print("gameButtons: ${gameButtons.size}")
+        // TODO - create all buttons within the kotlin code (to allow size depended board)
+        // https://stackoverflow.com/questions/15741520/adding-a-button-for-android-in-java-code
+        // https://www.techotopia.com/index.php/Creating_an_Android_User_Interface_in_Java_Code_using_Android_Studio
     }
+
     protected fun buttonClick(view: View) { // TODO - refactor to extract cellID from String
         val buttonSelected = view as Button
-        var cellID = 0
-        when (buttonSelected.id) {
-            R.id.button1 -> cellID = 1
-            R.id.button2 -> cellID = 2
-            R.id.button3 -> cellID = 3
-            R.id.button4 -> cellID = 4
-            R.id.button5 -> cellID = 5
-            R.id.button6 -> cellID = 6
-            R.id.button7 -> cellID = 7
-            R.id.button8 -> cellID = 8
-            R.id.button9 -> cellID = 9
-        }
+        var cellID = buttonSelected.tag.toString().toInt()
  //       Toast.makeText(this, "ID:" + cellID, Toast.LENGTH_SHORT).show()
         playGame(cellID, buttonSelected)
     }
@@ -69,80 +84,64 @@ class MainActivity : AppCompatActivity() {
         Thread.sleep(2000)
         player1.restartGame()
         player2.restartGame()
-        activePlayer = 1
-        for (button in buttonsPressed) {
+        activePlayer = player1
+        nextPlayer = player2
+        for (button in gameButtons) {
             button.text = ""
             button.setBackgroundColor(Color.GRAY)
             button.isEnabled = true
         }
-        buttonsPressed.clear()
     }
     private fun playGame(cellId: Int, buttonSelected: Button) {
-        // update players
-        if (activePlayer == 1) { // TODO - get rid of the if/else by moving those to be properties in Player
-            buttonSelected.text = player1.symbol
-            buttonSelected.setBackgroundColor(player1.color)
-            player1.play(cellId)
-            activePlayer = 2
-            val continueGame = autoPlay()
-            if (!continueGame) {
-                resetGame()
-            }
-        } else {
-            buttonSelected.text = player2.symbol
-            buttonSelected.setBackgroundColor(player2.color)
-            player2.play(cellId)
-            activePlayer = 1
-        }
-        // Disable button press
-        buttonSelected.isEnabled = false
-        // Add selected button to list
-        buttonsPressed.add(buttonSelected)
-        // check winner
-        // TODO - move board logic to new class Board with statuses
-        // TODO - move size of the board to be N
-        if (checkWinner() || buttonsPressed.size == 9) {
+        // play with the active player
+        buttonSelected.text = activePlayer.symbol
+        buttonSelected.setBackgroundColor(activePlayer.color)
+        activePlayer.play(cellId)
+        // update board
+        buttonSelected.isEnabled = false   // Disable button press
+        // check game over/winner
+        // TODO ("move board logic to new class Board with statuses")
+        // TODO ("move size of the board to be N")
+        if (checkWinner() || (player1.numberOfPlays() + player2.numberOfPlays() == gameSize)) {
             resetGame()
+        } else {
+            // continue to next player
+            updateNextPlayer()
+            if (activePlayer.playerType == PlayerType.ANDROID) {
+                autoPlay()
+            }
         }
     }
-    private fun autoPlay() : Boolean { // TODO - add logic to find best cell to play
+
+    private fun updateNextPlayer() {
+        val currPlayer = activePlayer
+        activePlayer = nextPlayer
+        nextPlayer = currPlayer
+    }
+
+    private fun autoPlay()  {
         var emptyCells = ArrayList<Int>()
-        for (cellId in 1..9) {
+        for (cellId in 1..gameSize) {
             if (!(player1.containsCell(cellId) || player2.containsCell(cellId)))
                 emptyCells.add(cellId)
         }
-        if (emptyCells.isEmpty())
-            return false
+        // TODO("unit test that we don't reach this method with no emptyCells")
+        // TODO("add logic to find best cell to play")
         // random cell
         val r = Random()
         val randomIndex = r.nextInt(emptyCells.size-0)+0
         val cellId = emptyCells[randomIndex]
         var buSelected:Button = button1
-        when (cellId) { //TODO - set buSelected by converting the Int to button name
-            1-> buSelected=button1
-            2-> buSelected=button2
-            3-> buSelected=button3
-            4-> buSelected=button4
-            5-> buSelected=button5
-            6-> buSelected=button6
-            7-> buSelected=button7
-            8-> buSelected=button8
-            9-> buSelected=button9
-        }
+        for (button in gameButtons)
+            if (button.tag.toString().toInt() == cellId) {
+                buSelected = button
+                break
+            }
         playGame(cellId, buSelected)
-        return true
     }
     private fun checkWinner(): Boolean {
-        var winner = -1
-        // rows
-        if (player1.isWin()) {
-            winner = 1
-        } else if (player2.isWin()) {
-            winner = 2
-        }
-        if (winner != -1) {
-            val winnerStr:String = if (winner==1) "Player 1" else "Player2"
-            Toast.makeText(this, winnerStr + " Won", Toast.LENGTH_LONG).show()
+        if (activePlayer.isWin()) {
+            Toast.makeText(this, activePlayer.name + " Won", Toast.LENGTH_LONG).show()
             return true
         }
         return false

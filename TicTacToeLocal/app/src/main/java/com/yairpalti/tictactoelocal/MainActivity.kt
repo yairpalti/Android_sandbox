@@ -9,7 +9,7 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 import android.view.ViewGroup
-
+import kotlin.math.sqrt
 
 
 enum class PlayerType {
@@ -30,22 +30,92 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType:P
     fun restartGame() {
         playedCells.clear()
     }
-
-    fun isWin(): Boolean { //TODO - check logic in loops
-        if ((playedCells.contains(1) && playedCells.contains(2) && playedCells.contains(3)) ||
-                (playedCells.contains(4) && playedCells.contains(5) && playedCells.contains(6)) ||
-                (playedCells.contains(7) && playedCells.contains(8) && playedCells.contains(9)) ||
-                // columns
-                (playedCells.contains(1) && playedCells.contains(4) && playedCells.contains(7)) ||
-                (playedCells.contains(2) && playedCells.contains(5) && playedCells.contains(8)) ||
-                (playedCells.contains(3) && playedCells.contains(6) && playedCells.contains(9)) ||
-                // diagonal
-                (playedCells.contains(1) && playedCells.contains(5) && playedCells.contains(9)) ||
-                (playedCells.contains(3) && playedCells.contains(5) && playedCells.contains(7)))
-            return true
+    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
+    private fun checkRow(row: Int, rowSize:Int): Int {
+        var emptyCell:Int = -1
+        for (cellInRow in 1..rowSize) {
+            val cell = (row - 1) * rowSize + cellInRow
+            if (!playedCells.contains(cell)) {
+                if (emptyCell == -1)
+                    emptyCell = cell
+                else
+                    return -1
+            }
+        }
+        if (emptyCell == -1)
+            return 0
+        return emptyCell
+    }
+    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
+    private fun checkColumn(column: Int, columnSize:Int): Int {
+        var emptyCell:Int = -1
+        for (cellInColumn in 1..columnSize) { //1,4,7
+            val cell = column + columnSize * (cellInColumn-1)
+            if (!playedCells.contains(cell)) {
+                if (emptyCell == -1)
+                    emptyCell = cell
+                else
+                    return -1
+            }
+        }
+        if (emptyCell == -1)
+            return 0
+        return emptyCell
+    }
+    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
+    private fun checkDiagonal(diagonal:Int, diagonalSize:Int): Int {
+        var emptyCell:Int = -1
+        var step:Int
+        if (diagonal == -1) step = diagonalSize else step = 1
+        for (cellInRow in 1..diagonalSize) { //1,5,9 ; 3,5,7
+            val cell = diagonalSize * (cellInRow-1) + step
+            step += diagonal;
+            if (!playedCells.contains(cell)) {
+                if (emptyCell == -1)
+                    emptyCell = cell
+                else // more than 1 cell is empty
+                    return -1
+            }
+        }
+        if (emptyCell == -1)
+            return 0
+        return emptyCell
+    }
+    fun isWin(gameSize:Int): Boolean {
+        val rowSize:Int = sqrt(gameSize.toFloat()).toInt()
+        for (row in 1..rowSize)
+            if (checkRow(row, rowSize) == 0)
+                return true
+        for (column in 1..rowSize)
+            if (checkColumn(column, rowSize) == 0)
+                return true
+        for (diagonal in -1..1 step 2)
+            if (checkDiagonal(diagonal, rowSize) == 0)
+                return true
         return false
     }
+    // Returns -1 if no win in next play, otherwise returns the cell number of the next play for win
+    fun isWinInNextPlay(gameSize:Int, emptyCells:ArrayList<Int>) : Int {
+        val rowSize:Int = sqrt(gameSize.toFloat()).toInt()
+        for (row in 1..rowSize) {
+            val cell = checkRow(row, rowSize);
+            if (cell != -1 && emptyCells.contains(cell))
+              return cell
+        }
+        for (column in 1..rowSize) {
+            val cell = checkColumn(column, rowSize);
+            if (cell != -1  && emptyCells.contains(cell))
+                return cell
+        }
+        for (diagonal in -1..1 step 2) {
+            val cell = checkDiagonal(diagonal, rowSize);
+            if (cell != -1  && emptyCells.contains(cell))
+                return cell
+        }
+        return -1
+    }
 }
+
 class MainActivity : AppCompatActivity() {
 
     private val player1 = Player("You","X", Color.MAGENTA, PlayerType.HUMAN)
@@ -127,10 +197,18 @@ class MainActivity : AppCompatActivity() {
         }
         // TODO("unit test that we don't reach this method with no emptyCells")
         // TODO("add logic to find best cell to play")
-        // random cell
-        val r = Random()
-        val randomIndex = r.nextInt(emptyCells.size-0)+0
-        val cellId = emptyCells[randomIndex]
+        // Find if there is a cell that will enable winning
+        var cellId = activePlayer.isWinInNextPlay(gameSize, emptyCells)
+        if (cellId == -1) {
+            // Find if there is critical cell for next player
+            cellId = nextPlayer.isWinInNextPlay(gameSize, emptyCells)
+            if (cellId == -1) {
+                // random cell
+                val r = Random()
+                val randomIndex = r.nextInt(emptyCells.size - 0) + 0
+                cellId = emptyCells[randomIndex]
+            }
+        }
         var buSelected:Button = button1
         for (button in gameButtons)
             if (button.tag.toString().toInt() == cellId) {
@@ -140,7 +218,7 @@ class MainActivity : AppCompatActivity() {
         playGame(cellId, buSelected)
     }
     private fun checkWinner(): Boolean {
-        if (activePlayer.isWin()) {
+        if (activePlayer.isWin(gameSize)) {
             Toast.makeText(this, activePlayer.name + " Won", Toast.LENGTH_LONG).show()
             return true
         }

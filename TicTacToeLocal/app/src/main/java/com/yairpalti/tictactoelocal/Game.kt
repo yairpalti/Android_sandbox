@@ -2,32 +2,24 @@ package com.yairpalti.tictactoelocal
 
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
 import android.widget.Button
 import android.widget.Toast
 import java.util.*
 
-class Game (val context: Context) {
+class Game(private val context: Context)  {
+ //   TODO: Change Game to be singleton (but context can't be static)
+ // lateinit var context: Context
+ //   var gameSize:Int = 0
+    var gameSize:Int = 0
     private val player1 = Player("You", "X", Color.MAGENTA, PlayerType.HUMAN)
     private val player2 = Player("Android", "O", Color.CYAN, PlayerType.ANDROID)
     private var activePlayer = player1
     private var nextPlayer = player2
     private var gameButtons = ArrayList<Button>()
-    private val gameSize = 9
 
     fun addButton(button: Button) {
         gameButtons.add(button)
-    }
-    private fun resetGame() {
-        Thread.sleep(2000)
-        player1.restartGame()
-        player2.restartGame()
-        activePlayer = player1
-        nextPlayer = player2
-        for (button in gameButtons) {
-            button.text = ""
-            button.setBackgroundColor(Color.GRAY)
-            button.isEnabled = true
-        }
     }
     fun playGame(cellId: Int, buttonSelected: Button) {
         // play with the active player
@@ -37,10 +29,11 @@ class Game (val context: Context) {
         // update board
         buttonSelected.isEnabled = false   // Disable button press
         // check game over/winner
-        // TODO ("move board logic to new class Board with statuses")
-        // TODO ("move size of the board to be N")
-        if (checkWinner() || (player1.numberOfPlays() + player2.numberOfPlays() == gameSize)) {
-            resetGame()
+        var gameOverMessage: String? = checkWinner()
+        if ((gameOverMessage == null)  && (player1.numberOfPlays() + player2.numberOfPlays() == gameSize))
+            gameOverMessage = "No winner"
+        if (gameOverMessage != null) {
+            gameOver(gameOverMessage)
         } else {
             // continue to next player
             updateNextPlayer()
@@ -49,6 +42,32 @@ class Game (val context: Context) {
             }
         }
     }
+    private fun enableButtons (on:Boolean, alsoReset:Boolean = false) {
+        for (button in gameButtons) {
+            button.isEnabled = on
+            if (alsoReset) {
+                button.setBackgroundColor(Color.GRAY)
+                button.text = ""
+            }
+        }
+    }
+    private fun resetGame() {
+        player1.restartGame()
+        player2.restartGame()
+        activePlayer = player1
+        nextPlayer = player2
+        enableButtons(true, true)
+    }
+    private fun gameOver(gameOverMessage:String) {
+        // Show message
+        Toast.makeText(context, gameOverMessage, Toast.LENGTH_SHORT).show()
+        // Disable buttons
+        enableButtons (false)
+        // reset game after 2 seconds
+        val handler = Handler()
+        handler.postDelayed({ resetGame() }, 2000)
+    }
+
 
     private fun updateNextPlayer() {
         val currPlayer = activePlayer
@@ -84,11 +103,10 @@ class Game (val context: Context) {
             }
         playGame(cellId, buSelected)
     }
-    private fun checkWinner(): Boolean {
+    private fun checkWinner(): String? {
         if (activePlayer.isWin(gameSize)) {
-            Toast.makeText(context, activePlayer.name + " Won", Toast.LENGTH_LONG).show()
-            return true
+            return activePlayer.name + " Won"
         }
-        return false
+        return null
     }
 }

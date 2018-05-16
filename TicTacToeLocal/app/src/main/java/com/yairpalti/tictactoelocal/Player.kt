@@ -71,6 +71,8 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             return 0
         return emptyCell
     }
+    // TODO - add logic to allow another game version to win with N-1
+    // (In this case need to check also that there is continues order)
     fun isWin(gameSize:Int): Boolean {
         val rowSize:Int = sqrt(gameSize.toFloat()).toInt()
         for (row in 1..rowSize)

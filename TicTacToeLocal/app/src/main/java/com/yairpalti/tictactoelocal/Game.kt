@@ -84,11 +84,13 @@ class Game(private val context: Context)  {
         // TODO("unit test that we don't reach this method with no emptyCells")
         // TODO("add logic to find best cell to play")
         // Find if there is a cell that will enable winning
-        var cellId = activePlayer.isWinInNextPlay(gameSize, emptyCells)
-        if (cellId == -1) {
+        var cellsOnLine = activePlayer.isWinInNextPlay(gameSize, emptyCells)
+        var cellId = cellsOnLine.cellId
+        if (cellsOnLine.status == Player.CellsOnLineStatus.NO_WIN) {
             // Find if there is critical cell for next player
-            cellId = nextPlayer.isWinInNextPlay(gameSize, emptyCells)
-            if (cellId == -1) {
+            cellsOnLine = nextPlayer.isWinInNextPlay(gameSize, emptyCells)
+            cellId = cellsOnLine.cellId
+            if (cellsOnLine.status == Player.CellsOnLineStatus.NO_WIN) {
                 // random cell
                 val r = Random()
                 val randomIndex = r.nextInt(emptyCells.size - 0) + 0

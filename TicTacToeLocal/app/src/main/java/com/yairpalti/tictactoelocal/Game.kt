@@ -38,7 +38,8 @@ class Game(private val context: Context)  {
             // continue to next player
             updateNextPlayer()
             if (activePlayer.playerType == PlayerType.ANDROID) {
-                autoPlay()
+                val handler = Handler()
+                handler.postDelayed({ autoPlay() }, 500)
             }
         }
     }

@@ -24,7 +24,7 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
         WIN, NO_WIN, NEXT_PLAY_WIN
     }
     data class CellsOnLine(var status:CellsOnLineStatus, val cellId:Int=0)
-    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
+
     private fun checkRow(row: Int, rowSize:Int): CellsOnLine {
         var emptyCell:Int = -1
         for (cellInRow in 1..rowSize) {
@@ -40,7 +40,7 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             return CellsOnLine(CellsOnLineStatus.WIN)
         return CellsOnLine(CellsOnLineStatus.NEXT_PLAY_WIN, emptyCell)
     }
-    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
+
     private fun checkColumn(column: Int, columnSize:Int): CellsOnLine {
         var emptyCell:Int = -1
         for (cellInColumn in 1..columnSize) { //1,4,7
@@ -56,7 +56,6 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             return CellsOnLine(CellsOnLineStatus.WIN)
         return CellsOnLine(CellsOnLineStatus.NEXT_PLAY_WIN, emptyCell)
     }
-    // Returns 0 if row is full, cell number if only one cell is empty, -1 otherwise
     private fun checkDiagonal(diagonal:Int, diagonalSize:Int): CellsOnLine {
         var emptyCell:Int = -1
         var step:Int

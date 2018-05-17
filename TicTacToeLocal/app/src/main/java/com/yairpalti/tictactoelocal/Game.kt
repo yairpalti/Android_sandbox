@@ -1,13 +1,10 @@
-package com.yairpalti.tictactoelocal
+ package com.yairpalti.tictactoelocal
 
-import android.content.Context
 import android.graphics.Color
-import android.os.Handler
 import android.widget.Button
-import android.widget.Toast
 import java.util.*
 
-class Game(private val context: Context)  {
+object Game  {
  //   TODO: Change Game to be singleton (but context can't be static)
  // lateinit var context: Context
  //   var gameSize:Int = 0
@@ -18,10 +15,15 @@ class Game(private val context: Context)  {
     private var nextPlayer = player2
     private var gameButtons = ArrayList<Button>()
 
+
+    fun clearButtons() {
+        gameButtons.clear()
+    }
     fun addButton(button: Button) {
         gameButtons.add(button)
     }
-    fun playGame(cellId: Int, buttonSelected: Button) {
+
+    fun playGame(cellId: Int, buttonSelected: Button): GameStatus {
         // play with the active player
         buttonSelected.text = activePlayer.symbol
         buttonSelected.setBackgroundColor(activePlayer.color)
@@ -29,21 +31,21 @@ class Game(private val context: Context)  {
         // update board
         buttonSelected.isEnabled = false   // Disable button press
         // check game over/winner
-        var gameOverMessage: String? = checkWinner()
-        if ((gameOverMessage == null)  && (player1.numberOfPlays() + player2.numberOfPlays() == gameSize))
-            gameOverMessage = "No winner"
-        if (gameOverMessage != null) {
-            gameOver(gameOverMessage)
-        } else {
+        var gameStatus = getGameStatus()
+        if (gameStatus.status != GameStatuses.GAME_ON)
+//            gameOver(gameStatus.endGameMessage)
+        else {
             // continue to next player
             updateNextPlayer()
             if (activePlayer.playerType == PlayerType.ANDROID) {
-                val handler = Handler()
-                handler.postDelayed({ autoPlay() }, 500)
+                gameStatus = autoPlay()
+//                val handler = Handler()
+//                handler.postDelayed({ gameStatus = autoPlay() }, 200)
             }
         }
+        return gameStatus
     }
-    private fun enableButtons (on:Boolean, alsoReset:Boolean = false) {
+    fun enableButtons (on:Boolean, alsoReset:Boolean = false) {
         for (button in gameButtons) {
             button.isEnabled = on
             if (alsoReset) {
@@ -52,23 +54,13 @@ class Game(private val context: Context)  {
             }
         }
     }
-    private fun resetGame() {
+    fun resetGame() {
         player1.restartGame()
         player2.restartGame()
         activePlayer = player1
         nextPlayer = player2
         enableButtons(true, true)
     }
-    private fun gameOver(gameOverMessage:String) {
-        // Show message
-        Toast.makeText(context, gameOverMessage, Toast.LENGTH_SHORT).show()
-        // Disable buttons
-        enableButtons (false)
-        // reset game after 2 seconds
-        val handler = Handler()
-        handler.postDelayed({ resetGame() }, 2000)
-    }
-
 
     private fun updateNextPlayer() {
         val currPlayer = activePlayer
@@ -76,7 +68,7 @@ class Game(private val context: Context)  {
         nextPlayer = currPlayer
     }
 
-    private fun autoPlay()  {
+    private fun autoPlay():GameStatus {
         var emptyCells = ArrayList<Int>()
         for (cellId in 1..gameSize) {
             if (!(player1.containsCell(cellId) || player2.containsCell(cellId)))
@@ -104,12 +96,19 @@ class Game(private val context: Context)  {
                 buSelected = button
                 break
             }
-        playGame(cellId, buSelected)
+        return playGame(cellId, buSelected)
     }
-    private fun checkWinner(): String? {
-        if (activePlayer.isWin(gameSize)) {
-            return activePlayer.name + " Won"
-        }
-        return null
+    enum class GameStatuses {
+        WIN, NO_WIN, GAME_ON
+    }
+    data class GameStatus(var status:GameStatuses, var endGameMessage: String)
+    private fun getGameStatus(): GameStatus {
+        if (activePlayer.isWin(gameSize))
+            return GameStatus(GameStatuses.WIN,activePlayer.name + " Won")
+        else if ((player1.numberOfPlays() + player2.numberOfPlays() == gameSize))
+            return GameStatus(GameStatuses.NO_WIN,"No Winner")
+        // TODO - move strings to resources (currently crash)
+ //             return GameStatus(GameStatuses.NO_WIN, Resources.getSystem().getString(R.string.NO_WINNER))
+        return GameStatus(GameStatuses.GAME_ON, "")
     }
 }

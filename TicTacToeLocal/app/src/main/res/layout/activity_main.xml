@@ -35,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:checked="true"
             android:onClick="gameSizeClick"
             android:tag="3"
             android:text="3" />
@@ -59,13 +60,60 @@
 
     </RadioGroup>
 
+
+    <RadioGroup
+        android:id="@+id/radioGroup2"
+        android:layout_width="287dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="68dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="12dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup">
+
+        <TextView
+            android:id="@+id/tvWinSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="20dp"
+            android:text="@string/win_size"
+            android:textSize="24sp" />
+
+        <RadioButton
+            android:id="@+id/radioButtonN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:onClick="winSizeClick"
+            android:tag="N"
+            android:text="3" />
+
+        <RadioButton
+            android:id="@+id/radioButtonNMinus1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:onClick="winSizeClick"
+            android:tag="N-1"
+            android:text="2" />
+
+
+    </RadioGroup>
+
+
+
     <TableLayout
         android:id="@+id/gameLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="96dp"
         android:layout_weight="1"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup">
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup2">
 
     </TableLayout>
 

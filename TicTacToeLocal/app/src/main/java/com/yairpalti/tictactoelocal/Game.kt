@@ -7,8 +7,6 @@ import java.util.*
 import java.util.logging.Logger
 
  object Game {
-     //   TODO: Change Game to be singleton (but context can't be static)
-     // lateinit var context: Context
      var gameSize: Int = 0
          set(value) {
              field = value // backing field

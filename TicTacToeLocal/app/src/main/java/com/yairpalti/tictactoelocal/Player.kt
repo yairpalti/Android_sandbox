@@ -24,6 +24,7 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
         WIN, NO_WIN, NEXT_PLAY_WIN, NOT_DETERMINE
     }
     data class CellsOnLine(var status:CellsOnLineStatus, val cellId:Int=0)
+    data class DiagonalInfo(val startCell:Int, val direction:Int, val diagonalSize:Int)
 
     inner class RowStatus(private val rowSize:Int, private val winSize:Int, private val emptyCells: ArrayList<Int>) {
         private var emptyCell:Int = -1
@@ -33,6 +34,7 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
         private var lastCellWasMine = false
         private var lastCellWasEmpty = false
 
+
         private fun reset() {
             emptyCell = -1
             countSingleEmptyOrMyInSequence = 0
@@ -41,13 +43,14 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             lastCellWasMine = false
             lastCellWasEmpty = false
         }
-        private fun checkCell(cell:Int, cellInRow:Int): CellsOnLine {
+        private fun checkCell(cell:Int, cellInRow:Int, maxRowSize:Int): CellsOnLine {
+            // maxRowSize can be different than rowSize - for some of the diagonals
             if (!playedCells.contains(cell)) {
                 if (!emptyCells.contains(cell)) {
                     // Other player cell
                     countOther++
                     lastCellWasEmpty = false
-                    if (!(cellInRow == 1 || cellInRow == rowSize) || countOther == 2) {
+                    if (!(cellInRow == 1 || cellInRow == maxRowSize) || countOther == 2) {
                         // other player in the middle or at the two ends
                         return CellsOnLine(CellsOnLineStatus.NO_WIN)
                     }
@@ -86,7 +89,7 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             reset()
             for (cellInRow in 1..rowSize) {
                 val cell = (row - 1) * rowSize + cellInRow
-                val cellsOnLine = checkCell(cell, cellInRow)
+                val cellsOnLine = checkCell(cell, cellInRow, rowSize)
                 if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
                     return cellsOnLine
             }
@@ -96,70 +99,38 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             reset()
             for (cellInColumn in 1..rowSize) { //1,4,7
                 val cell = column + rowSize * (cellInColumn-1)
-                val cellsOnLine = checkCell(cell, cellInColumn)
+                val cellsOnLine = checkCell(cell, cellInColumn, rowSize)
                 if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
                     return cellsOnLine
             }
             return CellsOnLine(CellsOnLineStatus.NO_WIN)
         }
-        fun checkDiagonal(diagonal:Int): CellsOnLine {
-            // TODO need to check also other diagonals in case winSize is less than game size
+
+        fun checkDiagonal(diagonalInfo:DiagonalInfo): CellsOnLine {
             reset()
-            var step:Int
-            if (diagonal == -1) step = rowSize else step = 1
-            for (cellInRow in 1..rowSize) {
-                val cell = rowSize * (cellInRow-1) + step
-                step += diagonal;
-                val cellsOnLine = checkCell(cell, cellInRow)
+            var step:Int = rowSize + diagonalInfo.direction // direction = +-1
+            var cell:Int = diagonalInfo.startCell
+            for (cellInRow in 1..diagonalInfo.diagonalSize) {
+                val cellsOnLine = checkCell(cell, cellInRow, diagonalInfo.diagonalSize)
                 if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
                     return cellsOnLine
+                cell += step
             }
             return CellsOnLine(CellsOnLineStatus.NO_WIN)
         }
     }
- /*   private fun checkHorizontalRow(row: Int, rowSize:Int, winSize:Int, emptyCells: ArrayList<Int>): CellsOnLine {
-        // TODO - move this method to be inside the RowStatus class
-        // TODO - break to two methods - one to check win and one to check next play win
-        // Currently in case like this it will return "next play win" instead of win (for game of win 3 of 4): _xxxx
-        // The same for the checkColumn, checkDiagonal
-        var rowStatus = RowStatus(winSize,emptyCells)
-
-        for (cellInRow in 1..rowSize) {
-            val cell = (row - 1) * rowSize + cellInRow
-            val cellsOnLine = rowStatus.checkCell(cell, cellInRow, rowSize)
-            if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
-                return cellsOnLine
+    private fun getDiagonalList(rowSize:Int, winSize:Int):ArrayList<DiagonalInfo> {
+        var diagonalList = ArrayList<DiagonalInfo> ()
+        diagonalList.add(DiagonalInfo(1,1,rowSize))
+        diagonalList.add(DiagonalInfo(rowSize,-1,rowSize))
+        if (winSize < rowSize) {
+            diagonalList.add(DiagonalInfo(2,1,rowSize-1))
+            diagonalList.add(DiagonalInfo(rowSize-1,-1,rowSize-1))
+            diagonalList.add(DiagonalInfo(rowSize+1,1,rowSize-1))
+            diagonalList.add(DiagonalInfo(2*rowSize,-1,rowSize-1))
         }
-        return CellsOnLine(CellsOnLineStatus.NO_WIN)
-    }*/
-
- /*   private fun checkColumn(column: Int, columnSize:Int, winSize:Int, emptyCells: ArrayList<Int>): CellsOnLine {
-        var rowStatus = RowStatus(winSize,emptyCells)
-
-        for (cellInColumn in 1..columnSize) { //1,4,7
-            val cell = column + columnSize * (cellInColumn-1)
-            val cellsOnLine = rowStatus.checkCell(cell, cellInColumn, columnSize)
-            if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
-                return cellsOnLine
-        }
-        return CellsOnLine(CellsOnLineStatus.NO_WIN)
-    }*/
-
- /*   private fun checkDiagonal(diagonal:Int, diagonalSize:Int, winSize:Int, emptyCells: ArrayList<Int>): CellsOnLine {
-        // TODO need to check also other diagonals in case winSize is less than game size
-        var rowStatus = RowStatus(winSize,emptyCells)
-        var step:Int
-        if (diagonal == -1) step = diagonalSize else step = 1
-        for (cellInRow in 1..diagonalSize) {
-            val cell = diagonalSize * (cellInRow-1) + step
-            step += diagonal;
-            val cellsOnLine = rowStatus.checkCell(cell, cellInRow, diagonalSize)
-            if (cellsOnLine.status != CellsOnLineStatus.NOT_DETERMINE)
-                return cellsOnLine
-        }
-        return CellsOnLine(CellsOnLineStatus.NO_WIN)
-    }*/
-
+        return diagonalList
+    }
     fun isWin(gameSize:Int, winSize:Int, emptyCells: ArrayList<Int>): Boolean {
         val rowSize:Int = sqrt(gameSize.toFloat()).toInt()
 
@@ -172,12 +143,11 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             if (rowStatus.checkColumn(column).status == CellsOnLineStatus.WIN)
                 return true
         // diagonals
-//        var diagonalStartCells = ArrayList<Int> ()
-//        diagonalStartCells.add(1)
-
-        for (diagonal in -1..1 step 2)
-            if (rowStatus.checkDiagonal(diagonal).status == CellsOnLineStatus.WIN)
+        var diagonalList = getDiagonalList(rowSize, winSize)
+        for (i in 0 until diagonalList.size) {
+            if (rowStatus.checkDiagonal(diagonalList[i]).status == CellsOnLineStatus.WIN)
                 return true
+        }
         return false
     }
 
@@ -197,8 +167,10 @@ class Player(val name:String, val symbol:String, val color:Int, val playerType: 
             if (cellsOnLine.status == CellsOnLineStatus.NEXT_PLAY_WIN)
                 return cellsOnLine
         }
-        for (diagonal in -1..1 step 2) {
-            val cellsOnLine = rowStatus.checkDiagonal(diagonal);
+        // diagonals
+        var diagonalList = getDiagonalList(rowSize, winSize)
+        for (i in 0 until diagonalList.size) {
+            val cellsOnLine = rowStatus.checkDiagonal(diagonalList[i]);
             if (cellsOnLine.status == CellsOnLineStatus.NEXT_PLAY_WIN)
                 return cellsOnLine
         }

@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
                 var buttonParams = TableRow.LayoutParams(buttonSize.ptToPx(), buttonSize.ptToPx())
                 buttonParams.rightMargin = 3.ptToPx()
                 button.layoutParams = buttonParams
-                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
 
                 // Set game cell clickListener
                 val gameCellClickListener = View.OnClickListener { view -> buttonClick(view) }
@@ -61,13 +61,16 @@ class MainActivity : AppCompatActivity() {
         game.resetButtons()
     }
 
-
-    fun winSizeClick(view: View) {
-//        val buttonSelected = view as RadioButton
-//        if (buttonSelected.isChecked) {
-//            winSize = if (buttonSelected.tag.toString() == "N") rowSize else rowSize-1
-//            game.winSize = winSize
-//        }
+    fun playersClick(view: View) {
+        val buttonSelected = view as RadioButton
+        if (buttonSelected.isChecked) {
+            if (buttonSelected == radioButtonAndroid)
+                game.setSecondPlayer(PlayerType.ANDROID)
+            else
+                game.setSecondPlayer(PlayerType.HUMAN)
+        }
+    }
+    fun winSizeClick(@Suppress("UNUSED_PARAMETER") view:View) {
         setWinSize()
     }
     fun gameSizeClick(view: View) {
@@ -85,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         radioButtonN.text = rowSize.toString()
         radioButtonNMinus1.text = (rowSize-1).toString()
         // Handle special case of rowSize 3
-        if (rowSize == 3) {
+        if (rowSize == 3 || rowSize == 4) {
             radioButtonNMinus1.isEnabled = false
             radioButtonNMinus1.isChecked = false
             radioButtonN.isChecked = true
@@ -102,7 +105,10 @@ class MainActivity : AppCompatActivity() {
         radioButton5.isEnabled = enable
         radioButton4.isEnabled = enable
         radioButtonN.isEnabled = enable
-        if (rowSize == 3)
+        radioButton7.isEnabled = enable
+        radioButton2Players.isEnabled = enable
+        radioButtonAndroid.isEnabled = enable
+        if (rowSize == 3 || rowSize == 4)
             radioButtonNMinus1.isEnabled = false
         else
             radioButtonNMinus1.isEnabled = enable

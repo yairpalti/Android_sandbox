@@ -6,7 +6,7 @@ import kotlin.math.sqrt
 enum class PlayerType {
     HUMAN, ANDROID
 }
-class Player(val name:String, val symbol:String, val color:Int, val playerType: PlayerType = PlayerType.HUMAN) {
+class Player(var name:String, val symbol:String, val color:Int, var playerType: PlayerType = PlayerType.HUMAN) {
     private var playedCells = ArrayList<Int>()
     fun play(cellId: Int) {
         playedCells.add(cellId)

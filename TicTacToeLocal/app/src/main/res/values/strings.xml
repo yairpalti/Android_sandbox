@@ -1,6 +1,11 @@
 <resources>
-    <string name="app_name">TicTacToeLocal</string>
+    <string name="app_name">Tic Tac Toe</string>
     <string name="game_size">Game size:</string>
     <string name="NO_WINNER">No winner</string>
-    <string name="win_size">Win Size:</string>
+    <string name="win_size">Cells to win:</string>
+    <string name="GameSize_3">3</string>
+    <string name="GameSize_4">4</string>
+    <string name="GameSize_5">5</string>
+    <string name="GameSize_6">6</string>
+    <string name="players">Players:</string>
 </resources>

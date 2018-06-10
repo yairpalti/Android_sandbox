@@ -20,6 +20,16 @@ import java.util.logging.Logger
      private var gameButtons = ArrayList<Button>()
      private var emptyCells = ArrayList<Int>()
 
+     fun setSecondPlayer(playerType: PlayerType) {
+         player2.playerType = playerType
+         if (player2.playerType == PlayerType.HUMAN) {
+             player1.name = "First Player"
+             player2.name = "Second Player"
+         } else {
+             player1.name = "You"
+             player2.name = "Android"
+         }
+     }
      private fun resetEmptyCells() {
          emptyCells.clear()
          for (i in 1..gameSize)

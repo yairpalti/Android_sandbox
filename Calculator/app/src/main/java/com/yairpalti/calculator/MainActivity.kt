@@ -58,10 +58,11 @@ class MainActivity : AppCompatActivity() {
         showNumber(finalNumber)
         isNewOperation = true
     }
+    // Extension function to Double
+    private fun Double.format():String = java.text.NumberFormat.getInstance().format(this)
     private fun showNumber(number:Double) {
         // Format the number to not have .0
-        val finalNumberStr = java.text.NumberFormat.getInstance().format(number)
-        tvShowValue.setText(finalNumberStr)
+        tvShowValue.setText(number.format())
     }
     fun operationButtonEvent(view:View){
         val buttonPressed: Button = view as Button

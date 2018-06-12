@@ -1,7 +1,6 @@
 
 package com.yairpalti.calculator
 
-import android.icu.text.NumberFormat
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -15,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
     private var lastOperation = ""
-    private var firstValue:Double = 0.0
+    private var firstOperand:Double = 0.0
     private var isNewOperation = true
     private var isDotExist = false
 
@@ -38,25 +37,25 @@ class MainActivity : AppCompatActivity() {
         tvShowValue.setText(numberStr + numberButtonStr)
     }
     fun equalButtonEvent(@Suppress("UNUSED_PARAMETER") view:View) {
-        var currNumberString = tvShowValue.text.toString()
+        var numberStr = tvShowValue.text.toString()
         var finalNumber:Double = 0.0
         if (lastOperation == "")
             return
         when (lastOperation) {
             "+" -> {
-                finalNumber = firstValue + currNumberString.toDouble()
+                finalNumber = firstOperand + numberStr.toDouble()
             }
             "-" -> {
-                finalNumber = firstValue - currNumberString.toDouble()
+                finalNumber = firstOperand - numberStr.toDouble()
             }
             "*" -> {
-                finalNumber = firstValue * currNumberString.toDouble()
+                finalNumber = firstOperand * numberStr.toDouble()
             }
             "/" -> {
-                finalNumber = firstValue / currNumberString.toDouble()
+                finalNumber = firstOperand / numberStr.toDouble()
             }
         }
-        // TODO - clean the .0 when not needed
+        // Format the number to not have .0
         val finalNumberStr = java.text.NumberFormat.getInstance().format(finalNumber)
         tvShowValue.setText(finalNumberStr)
         isNewOperation = true
@@ -65,51 +64,36 @@ class MainActivity : AppCompatActivity() {
     fun operationButtonEvent(view:View){
         val buttonPressed: Button = view as Button
         lastOperation = buttonPressed.tag.toString()
-        firstValue = tvShowValue.text.toString().toDouble()
+        firstOperand = tvShowValue.text.toString().toDouble()
         isNewOperation = true
     }
-    fun notNumberButtonEvent(view:View) {
+    fun otherButtonEvent(view:View) {
         val buttonPressed:Button = view as Button
-        var valueToShow = tvShowValue.text.toString()
+        var numberStr = tvShowValue.text.toString()
         when (buttonPressed.id) {
             buttonAC.id -> {
-                valueToShow = "0"
-                lastOperation = ""
-                firstValue = 0.0
-                isNewOperation = true
-                isDotExist = false
+                numberStr = reset()
             }
             buttonPerc.id -> {
-                val number:Double = valueToShow.toDouble()/100.0
-                valueToShow = number.toString()
+                val number:Double = numberStr.toDouble()/100.0
+                numberStr = number.toString()
                 isNewOperation = true
             }
             buttonPlusMinus.id -> {
-                val number:Double = valueToShow.toDouble()
+                val number:Double = numberStr.toDouble()
                 if (number != 0.0)
-                    valueToShow = (-number).toString()
+                    numberStr = (-number).toString()
             }
-/*            buttonPlus.id -> {
-                lastOperation = "+"
-                firstValue = valueToShow.toDouble()
-                isNewOperation = true
-            }
-            buttonDiv.id -> {
-                lastOperation = "/"
-                firstValue = valueToShow.toDouble()
-                isNewOperation = true
-            }
-            buttonMinus.id -> {
-                lastOperation = "-"
-                firstValue = valueToShow.toDouble()
-                isNewOperation = true
-            }
-            buttonMultiple.id -> {
-                lastOperation = "*"
-                firstValue = valueToShow.toDouble()
-                isNewOperation = true
-            }*/
         }
-        tvShowValue.setText(valueToShow)
+        tvShowValue.setText(numberStr)
+    }
+
+    private fun reset(): String {
+        val numberStr = "0"
+        lastOperation = ""
+        firstOperand = 0.0
+        isNewOperation = true
+        isDotExist = false
+        return numberStr
     }
 }

@@ -9,7 +9,6 @@
     android:gravity="center"
     tools:context=".MainActivity">
 
-
     <RadioGroup
         android:id="@+id/radioGroup"
         android:layout_width="287dp"
@@ -25,7 +24,7 @@
             android:id="@+id/tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:text="@string/game_size"
             android:textSize="20sp" />
 
@@ -84,7 +83,7 @@
             android:id="@+id/tvWinSize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:text="@string/win_size"
             android:textSize="20sp" />
 
@@ -127,7 +126,7 @@
             android:id="@+id/tvPlayers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="20dp"
+            android:layout_marginEnd="20dp"
             android:text="@string/players"
             android:textSize="20sp" />
 
@@ -138,7 +137,7 @@
             android:layout_weight="1"
             android:checked="true"
             android:onClick="playersClick"
-            android:text="vs Android" />
+            android:text="@string/vs_android" />
 
         <RadioButton
             android:id="@+id/radioButton2Players"
@@ -147,7 +146,7 @@
             android:layout_weight="1"
             android:checked="false"
             android:onClick="playersClick"
-            android:text="2 Players" />
+            android:text="@string/_2_players" />
 
 
     </RadioGroup>

@@ -8,4 +8,7 @@
     <string name="GameSize_5">5</string>
     <string name="GameSize_6">6</string>
     <string name="players">Players:</string>
+    <string name="reset">Reset</string>
+    <string name="_2_players">2 Players</string>
+    <string name="vs_android">vs Android</string>
 </resources>

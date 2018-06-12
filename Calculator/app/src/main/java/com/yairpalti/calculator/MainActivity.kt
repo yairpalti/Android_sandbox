@@ -55,12 +55,14 @@ class MainActivity : AppCompatActivity() {
                 finalNumber = firstOperand / numberStr.toDouble()
             }
         }
-        // Format the number to not have .0
-        val finalNumberStr = java.text.NumberFormat.getInstance().format(finalNumber)
-        tvShowValue.setText(finalNumberStr)
+        showNumber(finalNumber)
         isNewOperation = true
     }
-
+    private fun showNumber(number:Double) {
+        // Format the number to not have .0
+        val finalNumberStr = java.text.NumberFormat.getInstance().format(number)
+        tvShowValue.setText(finalNumberStr)
+    }
     fun operationButtonEvent(view:View){
         val buttonPressed: Button = view as Button
         lastOperation = buttonPressed.tag.toString()
@@ -69,23 +71,26 @@ class MainActivity : AppCompatActivity() {
     }
     fun otherButtonEvent(view:View) {
         val buttonPressed:Button = view as Button
-        var numberStr = tvShowValue.text.toString()
+//        val numberStr = tvShowValue.text.toString()
+        var number:Double = tvShowValue.text.toString().toDouble()
         when (buttonPressed.id) {
             buttonAC.id -> {
-                numberStr = reset()
+                number = reset().toDouble()
             }
             buttonPerc.id -> {
-                val number:Double = numberStr.toDouble()/100.0
-                numberStr = number.toString()
+                number /= 100.0
+//                numberStr = number.toString()
                 isNewOperation = true
             }
             buttonPlusMinus.id -> {
-                val number:Double = numberStr.toDouble()
+//                val number:Double = numberStr.toDouble()
                 if (number != 0.0)
-                    numberStr = (-number).toString()
+                    number = -number
+//                    numberStr = (-number).toString()
             }
         }
-        tvShowValue.setText(numberStr)
+        showNumber(number)
+//        tvShowValue.setText(numberStr)
     }
 
     private fun reset(): String {

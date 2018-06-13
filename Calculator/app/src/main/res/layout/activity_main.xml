@@ -8,13 +8,26 @@
     tools:context=".MainActivity">
 
     <EditText
+        android:id="@+id/tvOperation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ems="10"
+        android:textAlignment="textEnd"
+        android:background="@color/colorGrey"
+        android:paddingTop="10pt"
+        android:textColor="@android:color/white"
+        android:textSize="10pt"
+        android:enabled="false" />
+
+    <EditText
         android:id="@+id/tvShowValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:background="@color/colorGrey"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:enabled="false"
         android:paddingTop="10pt"
         android:text="@string/_0"
         android:textAlignment="textEnd"

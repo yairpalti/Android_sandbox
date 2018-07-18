@@ -1,1 +1,8 @@
-node_modules/
+Calculator/.idea/dbnavigator.xml
+Calculator/app/proguard-rules.pro
+Calculator/app/release/
+FindOnMap.jks
+TicTacToeLocal/.idea/dbnavigator.xml
+TicTacToeLocal/app/release/
+calculator.jks
+tictactoeKey.jks
